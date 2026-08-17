@@ -302,6 +302,10 @@ function downloadStatement() {
     doc.setFontSize(10);
     doc.setTextColor(0, 0, 0);
     doc.text(account.name, leftMargin, y);
+    if (account.secondaryName) {
+        y += 5;
+        doc.text(account.secondaryName, leftMargin, y);
+    }
     y += 5;
     doc.text(account.serviceAddress, leftMargin, y);
     y += 5;
@@ -610,6 +614,11 @@ function renderAccountInfo() {
     document.getElementById('account-phone').value = currentAccount.phone;
     document.getElementById('account-number-display').value = currentAccount.accountNumber;
     
+    // Secondary account holder
+    document.getElementById('secondary-name').value = currentAccount.secondaryName || '';
+    document.getElementById('secondary-email').value = currentAccount.secondaryEmail || '';
+    document.getElementById('secondary-phone').value = currentAccount.secondaryPhone || '';
+    
     // Service info
     document.getElementById('service-address').textContent = 
         `${currentAccount.serviceAddress}, ${currentAccount.city}, ${currentAccount.state} ${currentAccount.zip}`;
@@ -627,6 +636,11 @@ function handleAccountSave(e) {
     currentAccount.name = document.getElementById('account-name').value;
     currentAccount.email = document.getElementById('account-email').value;
     currentAccount.phone = document.getElementById('account-phone').value;
+    
+    // Secondary account holder
+    currentAccount.secondaryName = document.getElementById('secondary-name').value;
+    currentAccount.secondaryEmail = document.getElementById('secondary-email').value;
+    currentAccount.secondaryPhone = document.getElementById('secondary-phone').value;
     
     // Update header greeting
     userGreeting.textContent = `Welcome, ${currentAccount.name}`;

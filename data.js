@@ -12,7 +12,7 @@ const accounts = {
     'ACC001': {
         accountId: 'ACC001',
         accountNumber: '4521-8834-7712',
-        name: 'John & Amanda Pham',
+        name: 'John Pham',
         email: 'ja.pham131@gmail.com',
         phone: '(832) 213-7682',
         serviceAddress: '1234 Oak Street',
@@ -21,7 +21,10 @@ const accounts = {
         zip: '62701',
         meterNumber: 'MTR-88421',
         rateType: 'Residential',
-        serviceStartDate: '2019-03-15'
+        serviceStartDate: '2019-03-15',
+        secondaryName: 'Amanda Pham',
+        secondaryEmail: 'amanda_orvis@yahoo.com',
+        secondaryPhone: '(989) 493-3544'
     },
     'ACC002': {
         accountId: 'ACC002',
@@ -35,7 +38,10 @@ const accounts = {
         zip: '62702',
         meterNumber: 'MTR-77239',
         rateType: 'Residential',
-        serviceStartDate: '2020-08-22'
+        serviceStartDate: '2020-08-22',
+        secondaryName: '',
+        secondaryEmail: '',
+        secondaryPhone: ''
     }
 };
 

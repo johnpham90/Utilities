@@ -794,3 +794,22 @@ body {
     color: var(--success-color);
     font-weight: 600;
 }
+
+/* ===== Form Section Divider ===== */
+.section-divider {
+    margin: 1.5rem 0 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.section-divider h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.form-group.half-width {
+    max-width: calc(50% - 0.5rem);
+}
