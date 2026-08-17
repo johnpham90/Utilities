@@ -4,7 +4,7 @@
 const users = [
     { username: 'johndoe', password: 'password123', accountId: 'ACC001' },
     { username: 'janesmith', password: 'utility2024', accountId: 'ACC002' },
-    { username: 'jpham131', password: 'demo', accountId: 'ACC001' }
+    { username: 'Jpham131', password: 'demo', accountId: 'ACC001' }
 ];
 
 // Account Information
