@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Springfield Electric Utility - Customer Portal</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="login-page" class="page active">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="company-logo">
+                    <span class="logo-icon">⚡</span>
+                    <h1>Springfield Electric</h1>
+                </div>
+                <p class="tagline">Customer Portal</p>
+            </div>
+            
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                
+                <div id="login-error" class="error-message"></div>
+                
+                <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+                
+                <div class="login-help">
+                    <p><strong></strong></p>
+                </div>
+            </form>
+            
+            <div class="login-footer">
+                <p>&copy; 2026 Springfield Electric Utility. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app-page" class="page">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <span class="logo-icon-small">⚡</span>
+                <span class="header-title">Springfield Electric</span>
+            </div>
+            <div class="header-right">
+                <span id="user-greeting" class="user-greeting"></span>
+                <button id="logout-btn" class="btn btn-outline btn-small">Logout</button>
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="bills">
+                <span class="tab-icon">📄</span>
+                <span class="tab-label">Bills</span>
+            </button>
+            <button class="tab-btn" data-tab="usage">
+                <span class="tab-icon">📊</span>
+                <span class="tab-label">Usage History</span>
+            </button>
+            <button class="tab-btn" data-tab="account">
+                <span class="tab-icon">👤</span>
+                <span class="tab-label">Account</span>
+            </button>
+            <button class="tab-btn" data-tab="contact">
+                <span class="tab-icon">📞</span>
+                <span class="tab-label">Contact</span>
+            </button>
+        </nav>
+
+        <!-- Tab Content -->
+        <main class="tab-content">
+            <!-- Bills Tab -->
+            <section id="bills-tab" class="tab-panel active">
+                <div class="panel-header">
+                    <h2>Your Bills</h2>
+                </div>
+                
+                <!-- Bill List View -->
+                <div id="bills-list" class="bills-list"></div>
+                
+                <!-- Bill Detail View -->
+                <div id="bill-detail" class="bill-detail hidden">
+                    <button id="back-to-bills" class="btn btn-outline btn-small">
+                        ← Back to Bills
+                    </button>
+                    
+                    <div class="bill-card">
+                        <div class="bill-card-header">
+                            <h3 id="detail-period"></h3>
+                            <span id="detail-status" class="bill-status"></span>
+                        </div>
+                        
+                        <div class="bill-info-grid">
+                            <div class="bill-info-section">
+                                <h4>Account Information</h4>
+                                <div class="info-row">
+                                    <span class="info-label">Account Number:</span>
+                                    <span id="detail-account-number" class="info-value"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Name:</span>
+                                    <span id="detail-name" class="info-value"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Service Address:</span>
+                                    <span id="detail-address" class="info-value"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="bill-info-section">
+                                <h4>Billing Details</h4>
+                                <div class="info-row">
+                                    <span class="info-label">Billing Period:</span>
+                                    <span id="detail-dates" class="info-value"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Due Date:</span>
+                                    <span id="detail-due-date" class="info-value"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Meter Number:</span>
+                                    <span id="detail-meter" class="info-value"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="bill-info-section">
+                                <h4>Meter Readings</h4>
+                                <div class="info-row">
+                                    <span class="info-label">Previous Reading:</span>
+                                    <span id="detail-prev-reading" class="info-value"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Current Reading:</span>
+                                    <span id="detail-curr-reading" class="info-value"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Usage:</span>
+                                    <span id="detail-usage" class="info-value highlight"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="bill-info-section">
+                                <h4>Charges</h4>
+                                <div class="info-row">
+                                    <span class="info-label">Base Charge:</span>
+                                    <span id="detail-base" class="info-value"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Energy Charge (<span id="detail-rate"></span>/kWh):</span>
+                                    <span id="detail-energy" class="info-value"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Taxes & Fees:</span>
+                                    <span id="detail-taxes" class="info-value"></span>
+                                </div>
+                                <div class="info-row total">
+                                    <span class="info-label">Amount Due:</span>
+                                    <span id="detail-total" class="info-value"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="daily-usage-chart">
+                            <h4>Daily Usage (kWh)</h4>
+                            <div class="chart-container">
+                                <canvas id="daily-usage-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="bill-actions">
+                            <button id="download-statement-btn" class="btn btn-primary">
+                                📥 Download Statement
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Usage History Tab -->
+            <section id="usage-tab" class="tab-panel">
+                <div class="panel-header">
+                    <h2>Usage History</h2>
+                    <p class="panel-subtitle">Track your electricity consumption over time</p>
+                </div>
+                
+                <div class="usage-summary">
+                    <div class="summary-card">
+                        <span class="summary-value" id="avg-usage">--</span>
+                        <span class="summary-label">Avg. Monthly Usage (kWh)</span>
+                    </div>
+                    <div class="summary-card">
+                        <span class="summary-value" id="total-usage">--</span>
+                        <span class="summary-label">Total 6-Month Usage (kWh)</span>
+                    </div>
+                    <div class="summary-card">
+                        <span class="summary-value" id="usage-trend">--</span>
+                        <span class="summary-label">vs. Last Month</span>
+                    </div>
+                </div>
+                
+                <div class="chart-wrapper">
+                    <h3>Monthly Usage Comparison</h3>
+                    <div class="chart-container large">
+                        <canvas id="usage-history-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-wrapper">
+                    <h3>Monthly Cost Breakdown</h3>
+                    <div class="chart-container large">
+                        <canvas id="cost-history-chart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Account Tab -->
+            <section id="account-tab" class="tab-panel">
+                <div class="panel-header">
+                    <h2>Account Settings</h2>
+                </div>
+                
+                <div class="account-card">
+                    <h3>Personal Information</h3>
+                    <form id="account-form" class="account-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="account-name">Full Name</label>
+                                <input type="text" id="account-name" name="name">
+                            </div>
+                            <div class="form-group">
+                                <label for="account-email">Email Address</label>
+                                <input type="email" id="account-email" name="email">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="account-phone">Phone Number</label>
+                                <input type="tel" id="account-phone" name="phone">
+                            </div>
+                            <div class="form-group">
+                                <label for="account-number-display">Account Number</label>
+                                <input type="text" id="account-number-display" name="accountNumber" disabled>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <span id="save-message" class="save-message"></span>
+                    </form>
+                </div>
+                
+                <div class="account-card">
+                    <h3>Service Address</h3>
+                    <div class="service-info">
+                        <div class="info-row">
+                            <span class="info-label">Address:</span>
+                            <span id="service-address" class="info-value"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Meter Number:</span>
+                            <span id="service-meter" class="info-value"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Rate Type:</span>
+                            <span id="service-rate-type" class="info-value"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Service Start Date:</span>
+                            <span id="service-start" class="info-value"></span>
+                        </div>
+                    </div>
+                    <p class="help-text">To update your service address, please contact customer support.</p>
+                </div>
+            </section>
+
+            <!-- Contact Tab -->
+            <section id="contact-tab" class="tab-panel">
+                <div class="panel-header">
+                    <h2>Contact & Support</h2>
+                </div>
+                
+                <div class="contact-grid">
+                    <div class="contact-card">
+                        <h3>Customer Service</h3>
+                        <div class="contact-info">
+                            <p><strong>Phone:</strong> <span id="company-phone"></span></p>
+                            <p><strong>Email:</strong> <span id="company-email"></span></p>
+                            <p><strong>Hours:</strong> <span id="company-hours"></span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card emergency">
+                        <h3>Emergency Services</h3>
+                        <div class="contact-info">
+                            <p><strong>Power Outages & Emergencies:</strong></p>
+                            <p class="emergency-number" id="emergency-line"></p>
+                            <p class="help-text">Available 24/7 for emergencies</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <h3>Mailing Address</h3>
+                        <div class="contact-info">
+                            <p id="company-name-address"></p>
+                            <p id="company-address"></p>
+                            <p id="company-city-state"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form-section">
+                    <h3>Send Us a Message</h3>
+                    <form id="contact-form" class="contact-form">
+                        <div class="form-group">
+                            <label for="contact-subject">Subject</label>
+                            <select id="contact-subject" name="subject" required>
+                                <option value="">Select a topic...</option>
+                                <option value="billing">Billing Question</option>
+                                <option value="service">Service Issue</option>
+                                <option value="account">Account Changes</option>
+                                <option value="feedback">Feedback</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contact-message">Message</label>
+                            <textarea id="contact-message" name="message" rows="5" placeholder="How can we help you?" required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                        <span id="contact-message-status" class="save-message"></span>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>&copy; 2026 Springfield Electric Utility. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
