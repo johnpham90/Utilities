@@ -751,3 +751,46 @@ body {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* ===== Payment Info ===== */
+.payment-info {
+    padding: 0.5rem 0;
+}
+
+.payment-card-display {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    color: white;
+    padding: 1.25rem 1.5rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 1rem;
+}
+
+.card-icon {
+    font-size: 2rem;
+}
+
+.card-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.card-number {
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    font-family: 'Courier New', monospace;
+}
+
+.card-expiry {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+.status-active {
+    color: var(--success-color);
+    font-weight: 600;
+}
