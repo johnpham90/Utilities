@@ -45,11 +45,45 @@ const accounts = {
     }
 };
 
-// Utility Bills (6 months of data)
+// Utility Bills (8 months of data)
 const bills = {
     'ACC001': [
         {
+            billId: 'BILL001-000',
+            billingPeriod: 'September 2026',
+            startDate: '2026-09-01',
+            endDate: '2026-09-09',
+            dueDate: '2026-10-05',
+            usageKwh: 280,
+            previousReading: 47002,
+            currentReading: 47282,
+            ratePerKwh: 0.12,
+            baseCharge: 15.00,
+            energyCharge: 33.60,
+            taxes: 4.23,
+            amountDue: 52.83,
+            isPaid: false,
+            dailyUsage: [32, 30, 28, 35, 29, 31, 33, 27, 30]
+        },
+        {
             billId: 'BILL001-001',
+            billingPeriod: 'August 2026',
+            startDate: '2026-08-01',
+            endDate: '2026-08-31',
+            dueDate: '2026-09-20',
+            usageKwh: 880,
+            previousReading: 46122,
+            currentReading: 47002,
+            ratePerKwh: 0.12,
+            baseCharge: 15.00,
+            energyCharge: 105.60,
+            taxes: 10.49,
+            amountDue: 131.09,
+            isPaid: true,
+            dailyUsage: [29, 32, 31, 30, 34, 28, 32, 30, 31, 29, 33, 31, 30, 32, 29, 31, 33, 30, 28, 32, 31, 29, 30, 32, 31, 28, 33, 31, 29, 32, 30]
+        },
+        {
+            billId: 'BILL001-002',
             billingPeriod: 'July 2026',
             startDate: '2026-07-01',
             endDate: '2026-07-31',
@@ -66,7 +100,7 @@ const bills = {
             dailyUsage: [28, 32, 25, 30, 35, 29, 27, 31, 33, 26, 28, 30, 32, 29, 27, 31, 34, 28, 26, 30, 33, 29, 27, 25, 32, 30, 28, 31, 29, 27, 33]
         },
         {
-            billId: 'BILL001-002',
+            billId: 'BILL001-003',
             billingPeriod: 'June 2026',
             startDate: '2026-06-01',
             endDate: '2026-06-30',
@@ -83,7 +117,7 @@ const bills = {
             dailyUsage: [24, 26, 22, 28, 25, 23, 27, 24, 26, 25, 28, 24, 22, 26, 25, 27, 23, 28, 24, 26, 25, 27, 23, 24, 26, 28, 25, 24, 27, 26]
         },
         {
-            billId: 'BILL001-003',
+            billId: 'BILL001-004',
             billingPeriod: 'May 2026',
             startDate: '2026-05-01',
             endDate: '2026-05-31',
@@ -100,7 +134,7 @@ const bills = {
             dailyUsage: [20, 22, 18, 21, 19, 23, 20, 22, 21, 19, 20, 22, 18, 21, 23, 20, 19, 22, 21, 20, 18, 23, 21, 19, 22, 20, 21, 19, 23, 20, 21]
         },
         {
-            billId: 'BILL001-004',
+            billId: 'BILL001-005',
             billingPeriod: 'April 2026',
             startDate: '2026-04-01',
             endDate: '2026-04-30',
@@ -117,7 +151,7 @@ const bills = {
             dailyUsage: [18, 20, 17, 19, 21, 18, 20, 19, 17, 21, 18, 20, 19, 18, 21, 17, 20, 19, 18, 21, 19, 17, 20, 18, 21, 19, 20, 18, 17, 21]
         },
         {
-            billId: 'BILL001-005',
+            billId: 'BILL001-006',
             billingPeriod: 'March 2026',
             startDate: '2026-03-01',
             endDate: '2026-03-31',
@@ -134,7 +168,7 @@ const bills = {
             dailyUsage: [22, 24, 21, 23, 25, 22, 24, 23, 21, 25, 22, 24, 23, 22, 25, 21, 24, 23, 22, 25, 23, 21, 24, 22, 25, 23, 24, 22, 21, 25, 23]
         },
         {
-            billId: 'BILL001-006',
+            billId: 'BILL001-007',
             billingPeriod: 'February 2026',
             startDate: '2026-02-01',
             endDate: '2026-02-28',
@@ -153,7 +187,41 @@ const bills = {
     ],
     'ACC002': [
         {
+            billId: 'BILL002-000',
+            billingPeriod: 'September 2026',
+            startDate: '2026-09-01',
+            endDate: '2026-09-09',
+            dueDate: '2026-10-05',
+            usageKwh: 210,
+            previousReading: 33548,
+            currentReading: 33758,
+            ratePerKwh: 0.12,
+            baseCharge: 15.00,
+            energyCharge: 25.20,
+            taxes: 3.22,
+            amountDue: 43.42,
+            isPaid: false,
+            dailyUsage: [24, 23, 22, 25, 21, 23, 22, 20, 23]
+        },
+        {
             billId: 'BILL002-001',
+            billingPeriod: 'August 2026',
+            startDate: '2026-08-01',
+            endDate: '2026-08-31',
+            dueDate: '2026-09-20',
+            usageKwh: 720,
+            previousReading: 32828,
+            currentReading: 33548,
+            ratePerKwh: 0.12,
+            baseCharge: 15.00,
+            energyCharge: 86.40,
+            taxes: 8.11,
+            amountDue: 109.51,
+            isPaid: true,
+            dailyUsage: [23, 24, 22, 23, 25, 22, 24, 23, 21, 25, 22, 24, 23, 22, 25, 21, 24, 23, 22, 25, 23, 21, 24, 22, 25, 23, 24, 22, 23, 24, 22]
+        },
+        {
+            billId: 'BILL002-002',
             billingPeriod: 'July 2026',
             startDate: '2026-07-01',
             endDate: '2026-07-31',
@@ -170,7 +238,7 @@ const bills = {
             dailyUsage: [21, 23, 20, 22, 24, 21, 23, 22, 20, 24, 21, 23, 22, 21, 24, 20, 23, 22, 21, 24, 22, 20, 23, 21, 24, 22, 23, 21, 20, 24, 22]
         },
         {
-            billId: 'BILL002-002',
+            billId: 'BILL002-003',
             billingPeriod: 'June 2026',
             startDate: '2026-06-01',
             endDate: '2026-06-30',
@@ -187,7 +255,7 @@ const bills = {
             dailyUsage: [19, 21, 18, 20, 22, 19, 21, 20, 18, 22, 19, 21, 20, 19, 22, 18, 21, 20, 19, 22, 20, 18, 21, 19, 22, 20, 21, 19, 18, 22]
         },
         {
-            billId: 'BILL002-003',
+            billId: 'BILL002-004',
             billingPeriod: 'May 2026',
             startDate: '2026-05-01',
             endDate: '2026-05-31',
@@ -204,7 +272,7 @@ const bills = {
             dailyUsage: [17, 19, 16, 18, 17, 16, 19, 17, 18, 16, 17, 19, 18, 16, 17, 19, 18, 17, 16, 19, 17, 18, 16, 17, 19, 18, 17, 16, 19, 18, 17]
         },
         {
-            billId: 'BILL002-004',
+            billId: 'BILL002-005',
             billingPeriod: 'April 2026',
             startDate: '2026-04-01',
             endDate: '2026-04-30',
@@ -221,7 +289,7 @@ const bills = {
             dailyUsage: [16, 17, 15, 17, 16, 15, 18, 16, 17, 15, 16, 18, 17, 15, 16, 18, 17, 16, 15, 18, 16, 17, 15, 16, 18, 17, 16, 15, 18, 17]
         },
         {
-            billId: 'BILL002-005',
+            billId: 'BILL002-006',
             billingPeriod: 'March 2026',
             startDate: '2026-03-01',
             endDate: '2026-03-31',
@@ -238,7 +306,7 @@ const bills = {
             dailyUsage: [18, 20, 17, 19, 18, 17, 20, 18, 19, 17, 18, 20, 19, 17, 18, 20, 19, 18, 17, 20, 18, 19, 17, 18, 20, 19, 18, 17, 20, 19, 18]
         },
         {
-            billId: 'BILL002-006',
+            billId: 'BILL002-007',
             billingPeriod: 'February 2026',
             startDate: '2026-02-01',
             endDate: '2026-02-28',
