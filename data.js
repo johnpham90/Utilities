@@ -96,7 +96,7 @@ const bills = {
             energyCharge: 107.04,
             taxes: 9.15,
             amountDue: 131.19,
-            isPaid: false,
+            isPaid: true,
             dailyUsage: [28, 32, 25, 30, 35, 29, 27, 31, 33, 26, 28, 30, 32, 29, 27, 31, 34, 28, 26, 30, 33, 29, 27, 25, 32, 30, 28, 31, 29, 27, 33]
         },
         {
@@ -234,7 +234,7 @@ const bills = {
             energyCharge: 81.36,
             taxes: 7.23,
             amountDue: 103.59,
-            isPaid: false,
+            isPaid: true,
             dailyUsage: [21, 23, 20, 22, 24, 21, 23, 22, 20, 24, 21, 23, 22, 21, 24, 20, 23, 22, 21, 24, 22, 20, 23, 21, 24, 22, 23, 21, 20, 24, 22]
         },
         {
