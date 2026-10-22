@@ -54,6 +54,36 @@ function setupEventListeners() {
     
     // Contact form
     document.getElementById('contact-form').addEventListener('submit', handleContactSubmit);
+
+    // Payments
+    document.getElementById('pay-bill-btn').addEventListener('click', () => {
+        if (currentBillDetail) openPayModal([currentBillDetail.billId]);
+    });
+    document.getElementById('pay-cancel').addEventListener('click', closePayModal);
+    document.getElementById('pay-confirm').addEventListener('click', handlePayConfirm);
+
+    // Service requests
+    document.getElementById('request-form').addEventListener('submit', handleRequestSubmit);
+
+    // Billing preferences
+    [['setting-autopay', 'autopay'], ['setting-paperless', 'paperless'],
+     ['setting-email', 'emailAlerts'], ['setting-sms', 'smsAlerts']].forEach(([id, key]) => {
+        document.getElementById(id).addEventListener('change', e => {
+            accountSettings[currentUser.accountId][key] = e.target.checked;
+            renderBanner();
+        });
+    });
+
+    // Notifications
+    document.getElementById('notif-btn').addEventListener('click', e => {
+        e.stopPropagation();
+        toggleNotifications();
+    });
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.notif-wrapper')) {
+            document.getElementById('notif-panel').classList.add('hidden');
+        }
+    });
 }
 
 // ===== Authentication =====
@@ -92,6 +122,10 @@ function loginUser(user) {
     
     // Load initial data
     renderBillsList();
+    renderBanner();
+    renderPayments();
+    renderService();
+    renderNotifications();
     renderUsageHistory();
     renderAccountInfo();
     renderContactInfo();
@@ -157,8 +191,8 @@ function renderBillsList() {
             </div>
             <div class="bill-item-right">
                 <span class="bill-amount">${formatCurrency(bill.amountDue)}</span>
-                <span class="bill-status ${bill.isPaid ? 'paid' : 'due'}">
-                    ${bill.isPaid ? 'Paid' : 'Due'}
+                <span class="bill-status ${getBillStatus(bill)}">
+                    ${statusLabel(getBillStatus(bill))}
                 </span>
                 <span class="bill-arrow">→</span>
             </div>
@@ -167,6 +201,7 @@ function renderBillsList() {
 }
 
 let currentBillDetail = null;
+let payBillIds = [];
 
 function showBillDetail(billId) {
     const bill = currentBills.find(b => b.billId === billId);
@@ -176,12 +211,15 @@ function showBillDetail(billId) {
     
     // Hide list, show detail
     document.getElementById('bills-list').classList.add('hidden');
+    document.getElementById('account-banner').classList.add('hidden');
     document.getElementById('bill-detail').classList.remove('hidden');
     
     // Populate bill details
+    const status = getBillStatus(bill);
     document.getElementById('detail-period').textContent = bill.billingPeriod;
-    document.getElementById('detail-status').textContent = bill.isPaid ? 'Paid' : 'Due';
-    document.getElementById('detail-status').className = `bill-status ${bill.isPaid ? 'paid' : 'due'}`;
+    document.getElementById('detail-status').textContent = statusLabel(status);
+    document.getElementById('detail-status').className = `bill-status ${status}`;
+    document.getElementById('pay-bill-btn').classList.toggle('hidden', bill.isPaid);
     
     document.getElementById('detail-account-number').textContent = currentAccount.accountNumber;
     document.getElementById('detail-name').textContent = currentAccount.name;
@@ -211,6 +249,7 @@ function showBillDetail(billId) {
 function showBillsList() {
     document.getElementById('bill-detail').classList.add('hidden');
     document.getElementById('bills-list').classList.remove('hidden');
+    document.getElementById('account-banner').classList.remove('hidden');
     currentBillDetail = null;
     
     // Destroy daily usage chart
@@ -505,6 +544,10 @@ function renderUsageHistory() {
         trend >= 0 ? `+${trend}%` : `${trend}%`;
     document.getElementById('usage-trend').style.color = 
         trend > 0 ? '#ef4444' : trend < 0 ? '#22c55e' : '#64748b';
+
+    const recent = currentBills.slice(0, 3);
+    const estimate = recent.reduce((sum, bill) => sum + bill.amountDue, 0) / recent.length;
+    document.getElementById('est-next-bill').textContent = formatCurrency(estimate);
     
     // Prepare chart data (reverse to show oldest first)
     const sortedBills = [...currentBills].reverse();
@@ -621,6 +664,22 @@ function renderAccountInfo() {
     document.getElementById('service-meter').textContent = currentAccount.meterNumber;
     document.getElementById('service-rate-type').textContent = currentAccount.rateType;
     document.getElementById('service-start').textContent = formatDate(currentAccount.serviceStartDate);
+
+    const methods = paymentMethods[currentUser.accountId] || [];
+    document.getElementById('payment-methods').innerHTML = methods.map(m => `
+        <div class="payment-card-display">
+            <span class="card-icon">💳</span>
+            <div class="card-details">
+                <span class="card-number">${m.type} ending ${m.last4}${m.isDefault ? ' (default)' : ''}</span>
+                ${m.expiry ? `<span class="card-expiry">Exp: ${m.expiry}</span>` : ''}
+            </div>
+        </div>`).join('');
+
+    const s = accountSettings[currentUser.accountId];
+    document.getElementById('setting-autopay').checked = s.autopay;
+    document.getElementById('setting-paperless').checked = s.paperless;
+    document.getElementById('setting-email').checked = s.emailAlerts;
+    document.getElementById('setting-sms').checked = s.smsAlerts;
 }
 
 function handleAccountSave(e) {
@@ -656,6 +715,8 @@ function renderContactInfo() {
     document.getElementById('company-email').textContent = companyInfo.email;
     document.getElementById('company-hours').textContent = companyInfo.hours;
     document.getElementById('emergency-line').textContent = companyInfo.emergencyLine;
+    document.getElementById('footer-emergency').textContent = companyInfo.emergencyLine;
+    document.getElementById('footer-hours').textContent = companyInfo.hours;
     document.getElementById('company-name-address').textContent = companyInfo.name;
     document.getElementById('company-address').textContent = companyInfo.address;
     document.getElementById('company-city-state').textContent = 
@@ -678,6 +739,237 @@ function handleContactSubmit(e) {
     setTimeout(() => {
         messageEl.textContent = '';
     }, 5000);
+}
+
+// ===== Billing Status & Payments =====
+function getBillStatus(bill) {
+    if (bill.isPaid) return 'paid';
+    return new Date(`${bill.dueDate}T23:59:59`) < new Date() ? 'overdue' : 'due';
+}
+
+function statusLabel(status) {
+    return { paid: 'Paid', due: 'Due', overdue: 'Overdue' }[status];
+}
+
+function renderBanner() {
+    const banner = document.getElementById('account-banner');
+    const unpaid = currentBills.filter(b => !b.isPaid);
+    const settings = accountSettings[currentUser.accountId];
+
+    if (unpaid.length === 0) {
+        banner.className = 'account-banner paid-up';
+        banner.innerHTML = `
+            <div><span class="banner-label">Account Balance</span>
+            <span class="banner-amount">${formatCurrency(0)}</span></div>
+            <div class="banner-note">You're all paid up. Thank you!</div>`;
+        return;
+    }
+
+    const total = unpaid.reduce((sum, b) => sum + b.amountDue, 0);
+    const next = [...unpaid].sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
+    const overdue = unpaid.some(b => getBillStatus(b) === 'overdue');
+    const days = Math.ceil((new Date(`${next.dueDate}T23:59:59`) - new Date()) / 86400000);
+    const dueText = days < 0
+        ? `${Math.abs(days)} day${Math.abs(days) === 1 ? '' : 's'} overdue`
+        : `Due in ${days} day${days === 1 ? '' : 's'}`;
+
+    banner.className = `account-banner ${overdue ? 'overdue' : ''}`;
+    banner.innerHTML = `
+        <div>
+            <span class="banner-label">Amount Due</span>
+            <span class="banner-amount">${formatCurrency(total)}</span>
+        </div>
+        <div class="banner-note">
+            <span class="bill-status ${overdue ? 'overdue' : 'due'}">${dueText}</span>
+            <span>Next due date: ${formatDate(next.dueDate)}</span>
+            ${settings.autopay ? '<span>Auto-Pay is on</span>' : ''}
+        </div>
+        <button class="btn btn-primary" onclick="openPayModal()">Pay Now</button>`;
+}
+
+function openPayModal(billIds) {
+    const ids = billIds || currentBills.filter(b => !b.isPaid).map(b => b.billId);
+    if (ids.length === 0) return;
+    payBillIds = ids;
+
+    const selected = currentBills.filter(b => ids.includes(b.billId));
+    const total = selected.reduce((sum, b) => sum + b.amountDue, 0);
+    document.getElementById('pay-bill-summary').innerHTML = selected.map(b => `
+        <div class="info-row"><span class="info-label">${b.billingPeriod}</span>
+        <span class="info-value">${formatCurrency(b.amountDue)}</span></div>`).join('');
+    document.getElementById('pay-total').textContent = `Total: ${formatCurrency(total)}`;
+    document.getElementById('pay-method').innerHTML = paymentMethods[currentUser.accountId].map(m =>
+        `<option value="${m.id}">${m.type} ending ${m.last4}</option>`).join('');
+
+    document.getElementById('pay-result').innerHTML = '';
+    document.getElementById('pay-form-area').classList.remove('hidden');
+    document.getElementById('pay-bill-summary').classList.remove('hidden');
+    document.getElementById('pay-confirm').classList.remove('hidden');
+    document.getElementById('pay-cancel').textContent = 'Cancel';
+    document.getElementById('pay-modal').classList.remove('hidden');
+}
+
+function closePayModal() {
+    document.getElementById('pay-modal').classList.add('hidden');
+    payBillIds = [];
+}
+
+function handlePayConfirm() {
+    const accountId = currentUser.accountId;
+    const method = paymentMethods[accountId].find(m => m.id === document.getElementById('pay-method').value);
+    const today = new Date().toISOString().slice(0, 10);
+    const paidBills = currentBills.filter(b => payBillIds.includes(b.billId));
+    const confirmation = `CNF${Date.now().toString().slice(-9)}`;
+
+    paidBills.forEach(bill => {
+        bill.isPaid = true;
+        payments[accountId].unshift({
+            paymentId: `PAY-${bill.billId.slice(4)}`,
+            billId: bill.billId,
+            billingPeriod: bill.billingPeriod,
+            date: today,
+            amount: bill.amountDue,
+            method: `${method.type} ending ${method.last4}`,
+            confirmation,
+            status: 'Completed'
+        });
+    });
+
+    const total = paidBills.reduce((sum, b) => sum + b.amountDue, 0);
+    notifications[accountId].unshift({
+        id: `N${Date.now()}`,
+        title: 'Payment received',
+        message: `We received your payment of ${formatCurrency(total)}.`,
+        date: today,
+        read: false
+    });
+
+    document.getElementById('pay-form-area').classList.add('hidden');
+    document.getElementById('pay-bill-summary').classList.add('hidden');
+    document.getElementById('pay-confirm').classList.add('hidden');
+    document.getElementById('pay-cancel').textContent = 'Close';
+    document.getElementById('pay-result').innerHTML = `
+        <p class="save-message success">Payment of ${formatCurrency(total)} successful.<br>Confirmation #: ${confirmation}</p>`;
+
+    renderBillsList();
+    renderBanner();
+    renderPayments();
+    renderNotifications();
+    if (currentBillDetail) showBillDetail(currentBillDetail.billId);
+}
+
+function renderPayments() {
+    const list = payments[currentUser.accountId] || [];
+    const container = document.getElementById('payments-list');
+    if (list.length === 0) {
+        container.innerHTML = '<p class="loading">No payments found.</p>';
+        return;
+    }
+    container.innerHTML = `
+        <table class="data-table">
+            <thead><tr><th>Date</th><th>Bill</th><th>Method</th><th>Confirmation</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody>${list.map(p => `
+                <tr>
+                    <td>${formatDate(p.date)}</td>
+                    <td>${p.billingPeriod}</td>
+                    <td>${p.method}</td>
+                    <td>${p.confirmation}</td>
+                    <td>${formatCurrency(p.amount)}</td>
+                    <td><span class="bill-status paid">${p.status}</span></td>
+                </tr>`).join('')}
+            </tbody>
+        </table>`;
+}
+
+// ===== Service Tab =====
+function renderService() {
+    const accountId = currentUser.accountId;
+
+    const areaOutages = outages.filter(o => o.area === currentAccount.city);
+    document.getElementById('outage-list').innerHTML = areaOutages.length === 0
+        ? '<p class="help-text">No outages reported in your area.</p>'
+        : areaOutages.map(o => `
+            <div class="list-row">
+                <div>
+                    <strong>${o.type} outage</strong>
+                    <div class="bill-dates">${o.start} - ${o.end.slice(-5)} &middot; ${o.customersAffected.toLocaleString()} customers</div>
+                    <div class="bill-dates">${o.description}</div>
+                </div>
+                <span class="bill-status ${o.status === 'Restored' ? 'paid' : 'due'}">${o.status}</span>
+            </div>`).join('');
+
+    const requests = serviceRequests[accountId] || [];
+    document.getElementById('request-list').innerHTML = requests.length === 0
+        ? '<p class="help-text">No service requests.</p>'
+        : requests.map(r => `
+            <div class="list-row">
+                <div>
+                    <strong>${r.type}</strong> <span class="bill-dates">${r.id} &middot; ${formatDate(r.date)}</span>
+                    <div class="bill-dates">${r.description}</div>
+                </div>
+                <span class="bill-status ${r.status === 'Resolved' ? 'paid' : 'due'}">${r.status}</span>
+            </div>`).join('');
+
+    document.getElementById('tips-list').innerHTML = energyTips.map(t => `
+        <div class="tip-card"><h4>${t.title}</h4><p>${t.text}</p></div>`).join('');
+}
+
+function handleRequestSubmit(e) {
+    e.preventDefault();
+    const accountId = currentUser.accountId;
+    const type = document.getElementById('request-type').value;
+    const description = document.getElementById('request-description').value.trim();
+    const id = `SR-${1100 + serviceRequests[accountId].length + 1}`;
+    const today = new Date().toISOString().slice(0, 10);
+
+    serviceRequests[accountId].unshift({ id, type, description, date: today, status: 'Submitted' });
+    notifications[accountId].unshift({
+        id: `N${Date.now()}`,
+        title: 'Request submitted',
+        message: `${type} request ${id} was received.`,
+        date: today,
+        read: false
+    });
+
+    e.target.reset();
+    renderService();
+    renderNotifications();
+
+    const statusEl = document.getElementById('request-status');
+    statusEl.textContent = `Request ${id} submitted.`;
+    statusEl.className = 'save-message success';
+    setTimeout(() => { statusEl.textContent = ''; }, 4000);
+}
+
+// ===== Notifications =====
+function renderNotifications() {
+    const list = notifications[currentUser.accountId] || [];
+    const unread = list.filter(n => !n.read).length;
+    const badge = document.getElementById('notif-count');
+    badge.textContent = unread;
+    badge.classList.toggle('hidden', unread === 0);
+
+    document.getElementById('notif-panel').innerHTML = list.length === 0
+        ? '<p class="help-text">No notifications.</p>'
+        : list.map(n => `
+            <div class="notif-item ${n.read ? '' : 'unread'}">
+                <strong>${n.title}</strong>
+                <span>${n.message}</span>
+                <small>${formatDate(n.date)}</small>
+            </div>`).join('');
+}
+
+function toggleNotifications() {
+    const panel = document.getElementById('notif-panel');
+    const opening = panel.classList.contains('hidden');
+    panel.classList.toggle('hidden');
+    if (opening) {
+        // Keep unread highlighting visible for this view, then clear the badge.
+        const list = notifications[currentUser.accountId];
+        list.forEach(n => { n.read = true; });
+        const badge = document.getElementById('notif-count');
+        badge.classList.add('hidden');
+    }
 }
 
 // ===== Utility Functions =====

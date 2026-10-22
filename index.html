@@ -55,6 +55,12 @@
                 <span class="header-title">Springfield Electric</span>
             </div>
             <div class="header-right">
+                <div class="notif-wrapper">
+                    <button id="notif-btn" class="notif-btn" aria-label="Notifications">
+                        🔔<span id="notif-count" class="notif-badge hidden"></span>
+                    </button>
+                    <div id="notif-panel" class="notif-panel hidden"></div>
+                </div>
                 <span id="user-greeting" class="user-greeting"></span>
                 <button id="logout-btn" class="btn btn-outline btn-small">Logout</button>
             </div>
@@ -66,9 +72,17 @@
                 <span class="tab-icon">📄</span>
                 <span class="tab-label">Bills</span>
             </button>
+            <button class="tab-btn" data-tab="payments">
+                <span class="tab-icon">💳</span>
+                <span class="tab-label">Payments</span>
+            </button>
             <button class="tab-btn" data-tab="usage">
                 <span class="tab-icon">📊</span>
                 <span class="tab-label">Usage History</span>
+            </button>
+            <button class="tab-btn" data-tab="service">
+                <span class="tab-icon">🛠️</span>
+                <span class="tab-label">Service</span>
             </button>
             <button class="tab-btn" data-tab="account">
                 <span class="tab-icon">👤</span>
@@ -88,6 +102,8 @@
                     <h2>Your Bills</h2>
                 </div>
                 
+                <div id="account-banner" class="account-banner"></div>
+
                 <!-- Bill List View -->
                 <div id="bills-list" class="bills-list"></div>
                 
@@ -170,11 +186,65 @@
                         </div>
                         
                         <div class="bill-actions">
+                            <button id="pay-bill-btn" class="btn btn-primary hidden">
+                                Pay This Bill
+                            </button>
                             <button id="download-statement-btn" class="btn btn-primary">
                                 📥 Download Statement
                             </button>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            <!-- Payments Tab -->
+            <section id="payments-tab" class="tab-panel">
+                <div class="panel-header">
+                    <h2>Payment History</h2>
+                    <p class="panel-subtitle">Your recent payments and confirmations</p>
+                </div>
+                <div id="payments-list" class="table-card"></div>
+            </section>
+
+            <!-- Service Tab -->
+            <section id="service-tab" class="tab-panel">
+                <div class="panel-header">
+                    <h2>Service Center</h2>
+                </div>
+
+                <div class="account-card">
+                    <h3>Outages in Your Area</h3>
+                    <div id="outage-list"></div>
+                </div>
+
+                <div class="account-card">
+                    <h3>Service Requests</h3>
+                    <div id="request-list"></div>
+                    <form id="request-form" class="contact-form">
+                        <div class="form-group">
+                            <label for="request-type">New Request</label>
+                            <select id="request-type" required>
+                                <option value="">Select a request type...</option>
+                                <option>Report an Outage</option>
+                                <option>Start Service</option>
+                                <option>Stop Service</option>
+                                <option>Transfer Service</option>
+                                <option>Meter Issue</option>
+                                <option>Billing Dispute</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="request-description">Details</label>
+                            <textarea id="request-description" rows="3" placeholder="Describe the issue or request" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Request</button>
+                        <span id="request-status" class="save-message"></span>
+                    </form>
+                </div>
+
+                <div class="account-card">
+                    <h3>Savings Tips &amp; Programs</h3>
+                    <div id="tips-list" class="tips-grid"></div>
                 </div>
             </section>
 
@@ -197,6 +267,10 @@
                     <div class="summary-card">
                         <span class="summary-value" id="usage-trend">--</span>
                         <span class="summary-label">vs. Last Month</span>
+                    </div>
+                    <div class="summary-card">
+                        <span class="summary-value" id="est-next-bill">--</span>
+                        <span class="summary-label">Estimated Next Bill</span>
                     </div>
                 </div>
                 
@@ -294,25 +368,17 @@
                 </div>
                 
                 <div class="account-card">
-                    <h3>Payment Information</h3>
-                    <div class="payment-info">
-                        <div class="payment-card-display">
-                            <span class="card-icon">💳</span>
-                            <div class="card-details">
-                                <span class="card-number">**** **** **** 1405</span>
-                                <span class="card-expiry">Exp: 11/27</span>
-                            </div>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Card Type:</span>
-                            <span class="info-value">Visa</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Billing Status:</span>
-                            <span class="info-value status-active">Auto-Pay Enabled</span>
-                        </div>
-                    </div>
-                    <p class="help-text">To update your payment method, please contact customer support.</p>
+                    <h3>Payment Methods</h3>
+                    <div id="payment-methods"></div>
+                    <p class="help-text">To add or remove a payment method, please contact customer support.</p>
+                </div>
+
+                <div class="account-card">
+                    <h3>Billing Preferences</h3>
+                    <label class="toggle-row"><span>Auto-Pay</span><input type="checkbox" id="setting-autopay"></label>
+                    <label class="toggle-row"><span>Paperless billing</span><input type="checkbox" id="setting-paperless"></label>
+                    <label class="toggle-row"><span>Email alerts</span><input type="checkbox" id="setting-email"></label>
+                    <label class="toggle-row"><span>Text message alerts</span><input type="checkbox" id="setting-sms"></label>
                 </div>
             </section>
 
@@ -380,8 +446,29 @@
 
         <!-- Footer -->
         <footer class="app-footer">
+            <p>Emergency line: <strong id="footer-emergency"></strong> &middot; <span id="footer-hours"></span></p>
             <p>&copy; 2026 Springfield Electric Utility. All rights reserved.</p>
         </footer>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="pay-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Make a Payment</h3>
+            <div id="pay-bill-summary"></div>
+            <div id="pay-form-area">
+                <div class="form-group">
+                    <label for="pay-method">Payment Method</label>
+                    <select id="pay-method"></select>
+                </div>
+                <p id="pay-total" class="pay-total"></p>
+            </div>
+            <div id="pay-result"></div>
+            <div class="modal-actions">
+                <button id="pay-cancel" class="btn btn-outline">Cancel</button>
+                <button id="pay-confirm" class="btn btn-primary">Pay Now</button>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->

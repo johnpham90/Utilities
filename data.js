@@ -18,7 +18,7 @@ const accounts = {
         serviceAddress: '1234 Oak Street',
         city: 'Orlando',
         state: 'FL',
-        zip: '62701',
+        zip: '32801',
         meterNumber: 'MTR-88421',
         rateType: 'Residential',
         serviceStartDate: '2019-03-15',
@@ -376,6 +376,78 @@ Object.values(bills).flat().forEach(bill => {
         { description: 'State & Local Sales Tax', amount: salesTax / 100 }
     ];
 });
+
+// Saved payment methods and account preferences
+const paymentMethods = {
+    'ACC001': [
+        { id: 'PM1', type: 'Visa', last4: '1405', expiry: '11/27', isDefault: true },
+        { id: 'PM2', type: 'Checking', last4: '6021', expiry: '', isDefault: false }
+    ],
+    'ACC002': [
+        { id: 'PM3', type: 'Mastercard', last4: '8832', expiry: '03/28', isDefault: true }
+    ]
+};
+
+const accountSettings = {
+    'ACC001': { autopay: true, paperless: true, emailAlerts: true, smsAlerts: false },
+    'ACC002': { autopay: false, paperless: false, emailAlerts: true, smsAlerts: true }
+};
+
+// Payment history derived from paid bills
+const payments = {};
+Object.entries(bills).forEach(([accountId, list]) => {
+    const method = paymentMethods[accountId][0];
+    payments[accountId] = list.filter(b => b.isPaid).map((b, i) => {
+        const paidOn = new Date(b.dueDate + 'T00:00:00Z');
+        paidOn.setUTCDate(paidOn.getUTCDate() - 3 - (i % 4));
+        return {
+            paymentId: `PAY-${b.billId.slice(4)}`,
+            billId: b.billId,
+            billingPeriod: b.billingPeriod,
+            date: paidOn.toISOString().slice(0, 10),
+            amount: b.amountDue,
+            method: `${method.type} ending ${method.last4}`,
+            confirmation: `CNF${b.billId.replace(/\D/g, '')}${Math.round(b.amountDue * 100)}`,
+            status: 'Completed'
+        };
+    });
+});
+
+// Outages by service area (matched to account city)
+const outages = [
+    { id: 'OUT-311', area: 'Orlando', type: 'Planned', status: 'Scheduled', start: '2026-10-28 09:00', end: '2026-10-28 13:00', description: 'Substation maintenance on Oak Street corridor.', customersAffected: 1200 },
+    { id: 'OUT-305', area: 'Orlando', type: 'Unplanned', status: 'Restored', start: '2026-10-14 17:42', end: '2026-10-14 19:10', description: 'Storm-related line fault.', customersAffected: 430 },
+    { id: 'OUT-312', area: 'Springfield', type: 'Planned', status: 'Scheduled', start: '2026-10-30 10:00', end: '2026-10-30 14:00', description: 'Transformer upgrade near Maple Avenue.', customersAffected: 650 },
+    { id: 'OUT-298', area: 'Springfield', type: 'Unplanned', status: 'Restored', start: '2026-10-09 06:15', end: '2026-10-09 07:30', description: 'Equipment failure on feeder line.', customersAffected: 210 }
+];
+
+const serviceRequests = {
+    'ACC001': [
+        { id: 'SR-1042', type: 'Meter Issue', description: 'Meter display flickering.', date: '2026-10-02', status: 'Resolved' }
+    ],
+    'ACC002': [
+        { id: 'SR-1051', type: 'Billing Dispute', description: 'Question about the gross receipts tax line.', date: '2026-10-15', status: 'In Progress' }
+    ]
+};
+
+const notifications = {
+    'ACC001': [
+        { id: 'N1', title: 'October statement available', message: 'Your October 2026 bill is ready to view.', date: '2026-10-22', read: false },
+        { id: 'N2', title: 'Planned outage', message: 'Maintenance on Oct 28, 9 AM - 1 PM in your area.', date: '2026-10-20', read: false },
+        { id: 'N3', title: 'Payment received', message: 'We received your September payment.', date: '2026-10-02', read: true }
+    ],
+    'ACC002': [
+        { id: 'N4', title: 'October statement available', message: 'Your October 2026 bill is ready to view.', date: '2026-10-22', read: false },
+        { id: 'N5', title: 'Planned outage', message: 'Maintenance on Oct 30, 10 AM - 2 PM in your area.', date: '2026-10-21', read: true }
+    ]
+};
+
+const energyTips = [
+    { title: 'Budget Billing', text: 'Spread your costs evenly with a fixed monthly amount based on your yearly average.' },
+    { title: 'Time-of-Use Rates', text: 'Run large appliances off-peak (9 PM - 6 AM) to lower your energy charge.' },
+    { title: 'Smart Thermostat Rebate', text: 'Get a $75 rebate when you install an eligible smart thermostat.' },
+    { title: 'Seal and Insulate', text: 'Sealing air leaks can cut heating and cooling costs by up to 15%.' }
+];
 
 // Company Information
 const companyInfo = {
