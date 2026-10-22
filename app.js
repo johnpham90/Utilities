@@ -197,10 +197,11 @@ function showBillDetail(billId) {
     document.getElementById('detail-curr-reading').textContent = `${bill.currentReading.toLocaleString()} kWh`;
     document.getElementById('detail-usage').textContent = `${bill.usageKwh.toLocaleString()} kWh`;
     
-    document.getElementById('detail-base').textContent = formatCurrency(bill.baseCharge);
-    document.getElementById('detail-rate').textContent = formatCurrency(bill.ratePerKwh);
-    document.getElementById('detail-energy').textContent = formatCurrency(bill.energyCharge);
-    document.getElementById('detail-taxes').textContent = formatCurrency(bill.taxes);
+    document.getElementById('detail-line-items').innerHTML = bill.lineItems.map(item => `
+        <div class="info-row">
+            <span class="info-label">${item.description}:</span>
+            <span class="info-value">${formatCurrency(item.amount)}</span>
+        </div>`).join('');
     document.getElementById('detail-total').textContent = formatCurrency(bill.amountDue);
     
     // Render daily usage chart
@@ -367,12 +368,7 @@ function downloadStatement() {
     
     y += 8;
     doc.setFont('helvetica', 'normal');
-    const charges = [
-        ['Base Service Charge', formatCurrency(bill.baseCharge)],
-        [`Energy Charge (${bill.usageKwh.toLocaleString()} kWh × ${formatCurrency(bill.ratePerKwh)}/kWh)`, formatCurrency(bill.energyCharge)],
-        ['State & Local Taxes', formatCurrency(bill.taxes * 0.6)],
-        ['Regulatory Fees', formatCurrency(bill.taxes * 0.4)]
-    ];
+    const charges = bill.lineItems.map(item => [item.description, formatCurrency(item.amount)]);
     
     charges.forEach((charge, i) => {
         doc.rect(leftMargin, y, 180, 8, 'S');

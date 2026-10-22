@@ -79,7 +79,7 @@ const bills = {
             energyCharge: 108.00,
             taxes: 10.70,
             amountDue: 133.70,
-            isPaid: false,
+            isPaid: true,
             dailyUsage: [32, 30, 28, 35, 29, 31, 33, 27, 30, 30, 29, 31, 28, 30, 32, 29, 30, 28, 31, 30, 29, 30, 31, 28, 29, 30, 32, 29, 30, 24]
         },
         {
@@ -234,7 +234,7 @@ const bills = {
             energyCharge: 79.20,
             taxes: 7.54,
             amountDue: 101.74,
-            isPaid: false,
+            isPaid: true,
             dailyUsage: [24, 23, 22, 25, 21, 23, 22, 20, 23, 22, 21, 23, 20, 22, 21, 22, 23, 20, 21, 22, 21, 23, 20, 22, 21, 22, 21, 23, 20, 20]
         },
         {
@@ -358,6 +358,24 @@ const bills = {
         }
     ]
 };
+
+// Itemize each bill; the taxes/fees split sums to bill.taxes so amountDue is unchanged
+Object.values(bills).flat().forEach(bill => {
+    const cents = n => Math.round(n * 100);
+    const taxCents = cents(bill.taxes);
+    const regulatory = Math.round(taxCents * 0.20);
+    const franchise = Math.round(taxCents * 0.25);
+    const grossReceipts = Math.round(taxCents * 0.25);
+    const salesTax = taxCents - regulatory - franchise - grossReceipts;
+    bill.lineItems = [
+        { description: 'Customer Charge', amount: bill.baseCharge },
+        { description: `Energy Charge (${bill.usageKwh.toLocaleString()} kWh @ $${bill.ratePerKwh.toFixed(4)}/kWh)`, amount: bill.energyCharge },
+        { description: 'Regulatory Assessment Fee', amount: regulatory / 100 },
+        { description: 'Municipal Franchise Fee', amount: franchise / 100 },
+        { description: 'Gross Receipts Tax', amount: grossReceipts / 100 },
+        { description: 'State & Local Sales Tax', amount: salesTax / 100 }
+    ];
+});
 
 // Company Information
 const companyInfo = {
