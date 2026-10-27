@@ -4,7 +4,8 @@
 const users = [
     { username: 'johndoe', password: 'password123', accountId: 'ACC001' },
     { username: 'janesmith', password: 'utility2024', accountId: 'ACC002' },
-    { username: 'Jpham131', password: 'demo', accountId: 'ACC001' }
+    { username: 'Jpham131', password: 'demo', accountId: 'ACC001' },
+    { username: 'KimPham', password: 'kimpham17', accountId: 'ACC003' }
 ];
 
 // Account Information
@@ -39,6 +40,23 @@ const accounts = {
         meterNumber: 'MTR-77239',
         rateType: 'Residential',
         serviceStartDate: '2020-08-22',
+        secondaryName: '',
+        secondaryEmail: '',
+        secondaryPhone: ''
+    },
+    'ACC003': {
+        accountId: 'ACC003',
+        accountNumber: '4521-6603-2917',
+        name: 'Kim Pham',
+        email: 'kim.pham@gmail.com',
+        phone: '(281) 948-4384',
+        serviceAddress: '815 Magnolia Lane',
+        city: 'Bonifay',
+        state: 'FL',
+        zip: '32425',
+        meterNumber: 'MTR-90317',
+        rateType: 'Residential',
+        serviceStartDate: '2021-05-10',
         secondaryName: '',
         secondaryEmail: '',
         secondaryPhone: ''
@@ -356,6 +374,161 @@ const bills = {
             isPaid: true,
             dailyUsage: [22, 24, 21, 23, 25, 22, 24, 23, 21, 25, 22, 24, 23, 22, 25, 21, 24, 23, 22, 25, 23, 21, 24, 22, 25, 23, 24, 22]
         }
+    ],
+    'ACC003': [
+        {
+            billId: 'BILL003-0000',
+            billingPeriod: 'October 2026',
+            startDate: '2026-10-01',
+            endDate: '2026-10-31',
+            dueDate: '2026-11-20',
+            usageKwh: 780,
+            previousReading: 24640,
+            currentReading: 25420,
+            ratePerKwh: 0.12,
+            baseCharge: 15.00,
+            energyCharge: 93.60,
+            taxes: 8.69,
+            amountDue: 117.29,
+            isPaid: false,
+            dailyUsage: [25, 26, 24, 27, 25, 24, 26, 25, 26, 24, 27, 25, 24, 26, 25, 26, 24, 27, 25, 24, 26, 25, 26, 24, 27, 25, 24, 26, 24, 24, 24]
+        },
+        {
+            billId: 'BILL003-000',
+            billingPeriod: 'September 2026',
+            startDate: '2026-09-01',
+            endDate: '2026-09-30',
+            dueDate: '2026-10-20',
+            usageKwh: 900,
+            previousReading: 23740,
+            currentReading: 24640,
+            ratePerKwh: 0.12,
+            baseCharge: 15.00,
+            energyCharge: 108.00,
+            taxes: 9.84,
+            amountDue: 132.84,
+            isPaid: true,
+            dailyUsage: [30, 31, 29, 32, 28, 30, 31, 30, 31, 29, 32, 28, 30, 31, 30, 31, 29, 32, 28, 30, 31, 30, 31, 29, 32, 28, 30, 31, 28, 28]
+        },
+        {
+            billId: 'BILL003-001',
+            billingPeriod: 'August 2026',
+            startDate: '2026-08-01',
+            endDate: '2026-08-31',
+            dueDate: '2026-09-20',
+            usageKwh: 980,
+            previousReading: 22760,
+            currentReading: 23740,
+            ratePerKwh: 0.12,
+            baseCharge: 15.00,
+            energyCharge: 117.60,
+            taxes: 10.61,
+            amountDue: 143.21,
+            isPaid: true,
+            dailyUsage: [32, 31, 33, 30, 32, 31, 33, 32, 31, 33, 30, 32, 31, 33, 32, 31, 33, 30, 32, 31, 33, 32, 31, 33, 30, 32, 31, 33, 31, 30, 31]
+        },
+        {
+            billId: 'BILL003-002',
+            billingPeriod: 'July 2026',
+            startDate: '2026-07-01',
+            endDate: '2026-07-31',
+            dueDate: '2026-08-20',
+            usageKwh: 955,
+            previousReading: 21805,
+            currentReading: 22760,
+            ratePerKwh: 0.12,
+            baseCharge: 15.00,
+            energyCharge: 114.60,
+            taxes: 10.37,
+            amountDue: 139.97,
+            isPaid: true,
+            dailyUsage: [31, 30, 32, 29, 31, 30, 32, 31, 30, 32, 29, 31, 30, 32, 31, 30, 32, 29, 31, 30, 32, 31, 30, 32, 29, 31, 30, 32, 31, 32, 32]
+        },
+        {
+            billId: 'BILL003-003',
+            billingPeriod: 'June 2026',
+            startDate: '2026-06-01',
+            endDate: '2026-06-30',
+            dueDate: '2026-07-20',
+            usageKwh: 840,
+            previousReading: 20965,
+            currentReading: 21805,
+            ratePerKwh: 0.12,
+            baseCharge: 15.00,
+            energyCharge: 100.80,
+            taxes: 9.26,
+            amountDue: 125.06,
+            isPaid: true,
+            dailyUsage: [27, 29, 28, 30, 26, 28, 29, 27, 29, 28, 30, 26, 28, 29, 27, 29, 28, 30, 26, 28, 29, 27, 29, 28, 30, 26, 28, 29, 27, 25]
+        },
+        {
+            billId: 'BILL003-004',
+            billingPeriod: 'May 2026',
+            startDate: '2026-05-01',
+            endDate: '2026-05-31',
+            dueDate: '2026-06-20',
+            usageKwh: 705,
+            previousReading: 20260,
+            currentReading: 20965,
+            ratePerKwh: 0.12,
+            baseCharge: 15.00,
+            energyCharge: 84.60,
+            taxes: 7.97,
+            amountDue: 107.57,
+            isPaid: true,
+            dailyUsage: [23, 22, 24, 21, 23, 22, 24, 23, 22, 24, 21, 23, 22, 24, 23, 22, 24, 21, 23, 22, 24, 23, 22, 24, 21, 23, 22, 24, 23, 22, 24]
+        },
+        {
+            billId: 'BILL003-005',
+            billingPeriod: 'April 2026',
+            startDate: '2026-04-01',
+            endDate: '2026-04-30',
+            dueDate: '2026-05-20',
+            usageKwh: 610,
+            previousReading: 19650,
+            currentReading: 20260,
+            ratePerKwh: 0.12,
+            baseCharge: 15.00,
+            energyCharge: 73.20,
+            taxes: 7.06,
+            amountDue: 95.26,
+            isPaid: true,
+            dailyUsage: [20, 21, 19, 22, 20, 19, 21, 20, 21, 19, 22, 20, 19, 21, 20, 21, 19, 22, 20, 19, 21, 20, 21, 19, 22, 20, 19, 21, 20, 22]
+        },
+        {
+            billId: 'BILL003-006',
+            billingPeriod: 'March 2026',
+            startDate: '2026-03-01',
+            endDate: '2026-03-31',
+            dueDate: '2026-04-20',
+            usageKwh: 690,
+            previousReading: 18960,
+            currentReading: 19650,
+            ratePerKwh: 0.12,
+            baseCharge: 15.00,
+            energyCharge: 82.80,
+            taxes: 7.82,
+            amountDue: 105.62,
+            isPaid: true,
+            dailyUsage: [22, 23, 21, 24, 22, 21, 23, 22, 23, 21, 24, 22, 21, 23, 22, 23, 21, 24, 22, 21, 23, 22, 23, 21, 24, 22, 21, 23, 22, 23, 21]
+        },
+        {
+            billId: 'BILL003-007',
+            billingPeriod: 'February 2026',
+            startDate: '2026-02-01',
+            endDate: '2026-02-28',
+            dueDate: '2026-03-20',
+            usageKwh: 760,
+            previousReading: 18200,
+            currentReading: 18960,
+            ratePerKwh: 0.12,
+            baseCharge: 15.00,
+            energyCharge: 91.20,
+            taxes: 8.50,
+            amountDue: 114.70,
+            isPaid: true,
+            dailyUsage: [26, 28, 27, 29, 26, 27, 28, 26, 28, 27, 29, 26, 27, 28, 26, 28, 27, 29, 26, 27, 28, 26, 28, 27, 29, 26, 27, 24]
+        }
     ]
 };
 
@@ -385,12 +558,16 @@ const paymentMethods = {
     ],
     'ACC002': [
         { id: 'PM3', type: 'Mastercard', last4: '8832', expiry: '03/28', isDefault: true }
+    ],
+    'ACC003': [
+        { id: 'PM4', type: 'Visa', last4: '4417', expiry: '06/29', isDefault: true }
     ]
 };
 
 const accountSettings = {
     'ACC001': { autopay: true, paperless: true, emailAlerts: true, smsAlerts: false },
-    'ACC002': { autopay: false, paperless: false, emailAlerts: true, smsAlerts: true }
+    'ACC002': { autopay: false, paperless: false, emailAlerts: true, smsAlerts: true },
+    'ACC003': { autopay: false, paperless: true, emailAlerts: true, smsAlerts: true }
 };
 
 // Payment history derived from paid bills
@@ -418,7 +595,8 @@ const outages = [
     { id: 'OUT-311', area: 'Chipley', type: 'Planned', status: 'Scheduled', start: '2026-10-28 09:00', end: '2026-10-28 13:00', description: 'Substation maintenance on Pine Ridge Road corridor.', customersAffected: 1200 },
     { id: 'OUT-305', area: 'Chipley', type: 'Unplanned', status: 'Restored', start: '2026-10-14 17:42', end: '2026-10-14 19:10', description: 'Storm-related line fault.', customersAffected: 430 },
     { id: 'OUT-312', area: 'Springfield', type: 'Planned', status: 'Scheduled', start: '2026-10-30 10:00', end: '2026-10-30 14:00', description: 'Transformer upgrade near Maple Avenue.', customersAffected: 650 },
-    { id: 'OUT-298', area: 'Springfield', type: 'Unplanned', status: 'Restored', start: '2026-10-09 06:15', end: '2026-10-09 07:30', description: 'Equipment failure on feeder line.', customersAffected: 210 }
+    { id: 'OUT-298', area: 'Springfield', type: 'Unplanned', status: 'Restored', start: '2026-10-09 06:15', end: '2026-10-09 07:30', description: 'Equipment failure on feeder line.', customersAffected: 210 },
+    { id: 'OUT-309', area: 'Bonifay', type: 'Unplanned', status: 'Restored', start: '2026-10-18 21:05', end: '2026-10-18 22:40', description: 'Tree contact on distribution line.', customersAffected: 315 }
 ];
 
 const serviceRequests = {
@@ -427,7 +605,8 @@ const serviceRequests = {
     ],
     'ACC002': [
         { id: 'SR-1051', type: 'Billing Dispute', description: 'Question about the gross receipts tax line.', date: '2026-10-15', status: 'In Progress' }
-    ]
+    ],
+    'ACC003': []
 };
 
 const notifications = {
@@ -439,6 +618,10 @@ const notifications = {
     'ACC002': [
         { id: 'N4', title: 'October statement available', message: 'Your October 2026 bill is ready to view.', date: '2026-10-22', read: false },
         { id: 'N5', title: 'Planned outage', message: 'Maintenance on Oct 30, 10 AM - 2 PM in your area.', date: '2026-10-21', read: true }
+    ],
+    'ACC003': [
+        { id: 'N6', title: 'October statement available', message: 'Your October 2026 bill is ready to view.', date: '2026-10-22', read: false },
+        { id: 'N7', title: 'Power restored', message: 'Service was restored in your area on Oct 18 at 10:40 PM.', date: '2026-10-18', read: true }
     ]
 };
 
