@@ -302,17 +302,13 @@ function downloadStatement() {
     
     // ===== AMOUNT DUE BOX =====
     const boxY = 42;
-    doc.setDrawColor(bill.isPaid ? 34 : 234, bill.isPaid ? 197 : 179, bill.isPaid ? 94 : 8);
-    doc.setLineWidth(1);
-    doc.roundedRect(120, boxY, 75, 38, 3, 3, 'S');
-    
     doc.setFontSize(9);
     doc.setTextColor(100, 100, 100);
     doc.text('AMOUNT DUE', 157.5, boxY + 10, { align: 'center' });
     
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(bill.isPaid ? 34 : 180, bill.isPaid ? 197 : 90, bill.isPaid ? 94 : 0);
+    doc.setTextColor(0, 0, 0);
     doc.text(formatCurrency(bill.amountDue), 157.5, boxY + 24, { align: 'center' });
     
     doc.setFontSize(10);
