@@ -15,10 +15,10 @@ const accounts = {
         name: 'John Pham',
         email: 'ja.pham131@gmail.com',
         phone: '(832) 213-7682',
-        serviceAddress: '1234 Oak Street',
-        city: 'Orlando',
+        serviceAddress: '2417 Pine Ridge Road',
+        city: 'Chipley',
         state: 'FL',
-        zip: '32801',
+        zip: '32428',
         meterNumber: 'MTR-88421',
         rateType: 'Residential',
         serviceStartDate: '2019-03-15',
@@ -415,8 +415,8 @@ Object.entries(bills).forEach(([accountId, list]) => {
 
 // Outages by service area (matched to account city)
 const outages = [
-    { id: 'OUT-311', area: 'Orlando', type: 'Planned', status: 'Scheduled', start: '2026-10-28 09:00', end: '2026-10-28 13:00', description: 'Substation maintenance on Oak Street corridor.', customersAffected: 1200 },
-    { id: 'OUT-305', area: 'Orlando', type: 'Unplanned', status: 'Restored', start: '2026-10-14 17:42', end: '2026-10-14 19:10', description: 'Storm-related line fault.', customersAffected: 430 },
+    { id: 'OUT-311', area: 'Chipley', type: 'Planned', status: 'Scheduled', start: '2026-10-28 09:00', end: '2026-10-28 13:00', description: 'Substation maintenance on Pine Ridge Road corridor.', customersAffected: 1200 },
+    { id: 'OUT-305', area: 'Chipley', type: 'Unplanned', status: 'Restored', start: '2026-10-14 17:42', end: '2026-10-14 19:10', description: 'Storm-related line fault.', customersAffected: 430 },
     { id: 'OUT-312', area: 'Springfield', type: 'Planned', status: 'Scheduled', start: '2026-10-30 10:00', end: '2026-10-30 14:00', description: 'Transformer upgrade near Maple Avenue.', customersAffected: 650 },
     { id: 'OUT-298', area: 'Springfield', type: 'Unplanned', status: 'Restored', start: '2026-10-09 06:15', end: '2026-10-09 07:30', description: 'Equipment failure on feeder line.', customersAffected: 210 }
 ];
