@@ -421,7 +421,7 @@ body {
 }
 
 .bill-status.paid {
-    background-color: #dcfce7;
+    background: none;
     color: #166534;
 }
 
@@ -816,7 +816,7 @@ body {
 
 /* ===== Billing Status, Banner, Payments ===== */
 .bill-status.overdue {
-    background-color: #fee2e2;
+    background: none;
     color: #991b1b;
 }
 
