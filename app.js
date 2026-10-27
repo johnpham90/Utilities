@@ -302,10 +302,9 @@ function downloadStatement() {
     
     // ===== AMOUNT DUE BOX =====
     const boxY = 42;
-    doc.setFillColor(bill.isPaid ? 220 : 254, bill.isPaid ? 252 : 226, bill.isPaid ? 231 : 226);
     doc.setDrawColor(bill.isPaid ? 34 : 234, bill.isPaid ? 197 : 179, bill.isPaid ? 94 : 8);
     doc.setLineWidth(1);
-    doc.roundedRect(120, boxY, 75, 38, 3, 3, 'FD');
+    doc.roundedRect(120, boxY, 75, 38, 3, 3, 'S');
     
     doc.setFontSize(9);
     doc.setTextColor(100, 100, 100);
