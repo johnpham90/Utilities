@@ -300,174 +300,381 @@ function downloadStatement() {
     
     doc.setTextColor(0, 0, 0);
     
-    // ===== AMOUNT DUE BOX =====
-    const boxY = 42;
-    doc.setFontSize(9);
-    doc.setTextColor(100, 100, 100);
-    doc.text('AMOUNT DUE', 157.5, boxY + 10, { align: 'center' });
-    
-    doc.setFontSize(24);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(0, 0, 0);
-    doc.text(formatCurrency(bill.amountDue), 157.5, boxY + 24, { align: 'center' });
-    
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(bill.isPaid ? 'PAID' : `Due: ${formatDate(bill.dueDate)}`, 157.5, boxY + 33, { align: 'center' });
-    
-    doc.setTextColor(0, 0, 0);
-    
-    // ===== ACCOUNT INFO (Left side) =====
-    let y = boxY + 5;
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    doc.text('ACCOUNT NUMBER', leftMargin, y);
-    y += 5;
-    doc.setFontSize(11);
-    doc.setTextColor(0, 0, 0);
-    doc.setFont('helvetica', 'bold');
-    doc.text(account.accountNumber, leftMargin, y);
-    
-    y += 10;
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    doc.setFont('helvetica', 'normal');
-    doc.text('SERVICE ADDRESS', leftMargin, y);
-    y += 5;
-    doc.setFontSize(10);
-    doc.setTextColor(0, 0, 0);
-    doc.text(account.name, leftMargin, y);
-    if (account.secondaryName) {
-        y += 5;
-        doc.text(account.secondaryName, leftMargin, y);
-    }
-    y += 5;
-    doc.text(account.serviceAddress, leftMargin, y);
-    y += 5;
-    doc.text(`${account.city}, ${account.state} ${account.zip}`, leftMargin, y);
-    
-    // ===== BILLING PERIOD BAR =====
-    y = 88;
-    doc.setFillColor(241, 245, 249);
-    doc.rect(leftMargin, y, 180, 12, 'F');
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`Billing Period: ${bill.billingPeriod}`, leftMargin + 5, y + 8);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`${formatDate(bill.startDate)} - ${formatDate(bill.endDate)}`, rightMargin - 5, y + 8, { align: 'right' });
-    
-    // ===== METER READINGS SECTION =====
-    y = 108;
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Meter Information', leftMargin, y);
-    
-    y += 8;
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.3);
-    
-    // Table header
-    doc.setFillColor(248, 250, 252);
-    doc.rect(leftMargin, y, 180, 8, 'F');
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Meter #', leftMargin + 3, y + 6);
-    doc.text('Previous', leftMargin + 50, y + 6);
-    doc.text('Current', leftMargin + 90, y + 6);
-    doc.text('Usage (kWh)', leftMargin + 130, y + 6);
-    
-    // Table row
-    y += 8;
-    doc.rect(leftMargin, y, 180, 10, 'S');
-    doc.setFont('helvetica', 'normal');
-    doc.text(account.meterNumber, leftMargin + 3, y + 7);
-    doc.text(bill.previousReading.toLocaleString(), leftMargin + 50, y + 7);
-    doc.text(bill.currentReading.toLocaleString(), leftMargin + 90, y + 7);
-    doc.setFont('helvetica', 'bold');
-    doc.text(bill.usageKwh.toLocaleString(), leftMargin + 130, y + 7);
-    
-    // ===== CHARGES SECTION =====
-    y += 20;
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Charges Summary', leftMargin, y);
-    
-    y += 8;
-    // Charges table
-    doc.setFillColor(248, 250, 252);
-    doc.rect(leftMargin, y, 180, 8, 'F');
-    doc.setFontSize(9);
-    doc.text('Description', leftMargin + 3, y + 6);
-    doc.text('Amount', rightMargin - 3, y + 6, { align: 'right' });
-    
-    y += 8;
-    doc.setFont('helvetica', 'normal');
-    const charges = bill.lineItems.map(item => [item.description, formatCurrency(item.amount)]);
-    
-    charges.forEach((charge, i) => {
-        doc.rect(leftMargin, y, 180, 8, 'S');
-        doc.text(charge[0], leftMargin + 3, y + 6);
-        doc.text(charge[1], rightMargin - 3, y + 6, { align: 'right' });
-        y += 8;
+    // ===== STATEMENT DATA =====
+    const settings = accountSettings[currentUser.accountId];
+    const website = 'www.springfieldelectric.com';
+    const remitAddress = ['P.O. Box 12345', `${companyInfo.city}, ${companyInfo.state} ${companyInfo.zip}`];
+    const idx = currentBills.indexOf(bill);
+    const prevBill = currentBills[idx + 1];
+    const history = currentBills.slice(idx, idx + 13).reverse();
+    const avgUsage = Math.round(history.reduce((sum, b) => sum + b.usageKwh, 0) / history.length);
+    const previousBalance = prevBill ? prevBill.amountDue : 0;
+    const paymentReceived = prevBill && prevBill.isPaid ? prevBill.amountDue : 0;
+    const balanceForward = previousBalance - paymentReceived;
+    const totalDue = balanceForward + bill.amountDue;
+    const invoiceNumber = `INV-${bill.billId.replace(/\D/g, '')}`;
+    const daysInPeriod = Math.round((new Date(bill.endDate) - new Date(bill.startDate)) / 86400000) + 1;
+    const avgCents = (bill.amountDue / bill.usageKwh * 100).toFixed(1);
+
+    // ===== DRAWING HELPERS =====
+    const lightBlue = [207, 226, 243];
+    const setText = (size, style = 'normal', gray = 0) => {
+        doc.setFontSize(size);
+        doc.setFont('helvetica', style);
+        doc.setTextColor(gray, gray, gray);
+    };
+    const sectionHeader = (title, x, y, w, h = 7, size = 10) => {
+        doc.setFillColor(...lightBlue);
+        doc.rect(x, y, w, h, 'F');
+        setText(size, 'bold');
+        doc.text(title, x + 3, y + h / 2 + size * 0.12);
+    };
+    const row = (label, value, x, y, w, style = 'normal') => {
+        setText(9, style);
+        doc.text(label, x + 3, y);
+        doc.text(value, x + w - 3, y, { align: 'right' });
+    };
+    // Returns the baseline y just below the wrapped text
+    const paragraph = (text, x, y, w, size = 9, style = 'normal', gray = 0) => {
+        setText(size, style, gray);
+        const lines = doc.splitTextToSize(text, w);
+        doc.text(lines, x, y);
+        return y + lines.length * size * 0.41;
+    };
+    const boxBorder = (x, y, w, h) => {
+        doc.setDrawColor(190, 210, 230);
+        doc.setLineWidth(0.3);
+        doc.rect(x, y, w, h, 'S');
+    };
+    const dashedLine = (y) => {
+        doc.setDrawColor(120, 120, 120);
+        doc.setLineWidth(0.3);
+        doc.setLineDashPattern([2, 2], 0);
+        doc.line(0, y, pageWidth, y);
+        doc.setLineDashPattern([], 0);
+    };
+
+    const colLeftW = 90;
+    const colRightX = 112;
+    const colRightW = rightMargin - colRightX;
+
+    // ===== YOUR BILL AT A GLANCE =====
+    let y = 42;
+    sectionHeader('Your Bill at a Glance', leftMargin, y, colLeftW, 8, 11);
+    [
+        ['Statement Date:', formatDate(bill.endDate)],
+        ['Due Date:', formatDate(bill.dueDate)],
+        ['Customer Name:', account.name],
+        ['Account Number:', account.accountNumber],
+        ['Invoice Number:', invoiceNumber]
+    ].forEach(([label, value], i) => {
+        const ly = y + 14 + i * 5.5 + (i >= 2 ? 3 : 0);
+        setText(9, 'bold');
+        doc.text(label, leftMargin + 3, ly);
+        setText(9);
+        doc.text(value, leftMargin + 33, ly);
     });
-    
-    // Total row
-    doc.setFillColor(30, 64, 175);
-    doc.rect(leftMargin, y, 180, 10, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('TOTAL AMOUNT DUE', leftMargin + 3, y + 7);
-    doc.text(formatCurrency(bill.amountDue), rightMargin - 3, y + 7, { align: 'right' });
-    doc.setTextColor(0, 0, 0);
-    
+    boxBorder(leftMargin, y, colLeftW, 42);
+
+    // ===== THANK YOU + AMOUNT DUE =====
+    setText(15, 'bold', 40);
+    doc.text('Thank you, valued customer!', colRightX, y + 6);
+    paragraph(`We appreciate the opportunity to power your home. Since 1952, ${companyInfo.name} has proudly served our neighbors with safe, reliable, and affordable energy.`,
+        colRightX, y + 13, colRightW, 8.5);
+
+    setText(9, 'normal', 100);
+    doc.text('AMOUNT DUE', colRightX, y + 32);
+    setText(24, 'bold');
+    doc.text(formatCurrency(totalDue), colRightX, y + 42);
+    setText(10);
+    doc.text(bill.isPaid ? 'PAID - Thank you!' : `Due: ${formatDate(bill.dueDate)}`, rightMargin, y + 42, { align: 'right' });
+
+    // ===== BILLING SUMMARY =====
+    y = 94;
+    sectionHeader('Billing Summary', leftMargin, y, colLeftW);
+    [
+        ['Previous Balance', formatCurrency(previousBalance)],
+        ['Payment Received - Thank You', paymentReceived ? `${formatCurrency(paymentReceived)} CR` : formatCurrency(0)],
+        ['Balance Forward', formatCurrency(balanceForward)],
+        ['Total Current Charges', formatCurrency(bill.amountDue)]
+    ].forEach(([label, value], i) => row(label, value, leftMargin + 4, y + 12 + i * 5, colLeftW - 4));
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.2);
+    doc.line(leftMargin + 68, y + 18, leftMargin + colLeftW - 3, y + 18);
+    doc.line(leftMargin + 68, y + 28, leftMargin + colLeftW - 3, y + 28);
+    doc.setFillColor(...lightBlue);
+    doc.rect(leftMargin, y + 30, colLeftW, 7, 'F');
+    row('Total Amount Due', formatCurrency(totalDue), leftMargin, y + 34.8, colLeftW, 'bold');
+
+    // ===== USAGE HISTORY CHART =====
+    setText(10, 'bold');
+    doc.text(`${history.length}-Month Electric (kWh) Usage History`, leftMargin + colLeftW / 2, y + 46, { align: 'center' });
+
+    const chartX = leftMargin + 14;
+    const chartW = colLeftW - 20;
+    const chartTop = y + 51;
+    const chartBottom = y + 86;
+    const chartH = chartBottom - chartTop;
+    const rawStep = Math.max(...history.map(b => b.usageKwh)) / 5;
+    const magnitude = 10 ** Math.floor(Math.log10(rawStep));
+    const step = [1, 2, 2.5, 5, 10].map(m => m * magnitude).find(s => s >= rawStep);
+    const axisMax = step * 5;
+
+    setText(6, 'normal', 80);
+    for (let i = 0; i <= 5; i++) {
+        doc.text((step * i).toLocaleString(), chartX - 2, chartBottom - (chartH * i) / 5 + 1, { align: 'right' });
+    }
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.3);
+    doc.line(chartX, chartTop, chartX, chartBottom);
+    doc.line(chartX, chartBottom, chartX + chartW, chartBottom);
+
+    const slot = chartW / history.length;
+    history.forEach((b, i) => {
+        const barH = (b.usageKwh / axisMax) * chartH;
+        const barX = chartX + i * slot + slot * 0.2;
+        if (b === bill) doc.setFillColor(30, 64, 175);
+        else doc.setFillColor(128, 128, 115);
+        doc.rect(barX, chartBottom - barH, slot * 0.6, barH, 'F');
+        setText(6, 'normal', 80);
+        doc.text(b.billingPeriod.slice(0, 3).toUpperCase(), barX + slot * 0.3, chartBottom + 4, { align: 'center' });
+    });
+
+    // ===== USAGE PER MONTH =====
+    setText(10, 'bold');
+    doc.text('Usage Per Month', leftMargin + colLeftW / 2, y + 95, { align: 'center' });
+    [
+        [prevBill ? `${prevBill.usageKwh.toLocaleString()} kWh` : 'N/A', 'Last Month'],
+        [`${bill.usageKwh.toLocaleString()} kWh`, 'This Month'],
+        [`${avgUsage.toLocaleString()} kWh`, 'Monthly Average']
+    ].forEach(([value, label], i) => {
+        const cx = leftMargin + 15 + i * 30;
+        setText(12, 'bold');
+        doc.text(value, cx, y + 102, { align: 'center' });
+        setText(7, 'bold', 60);
+        doc.text(label, cx, y + 106.5, { align: 'center' });
+    });
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.4);
+    doc.line(leftMargin + 30, y + 98, leftMargin + 30, y + 108);
+    doc.line(leftMargin + 60, y + 98, leftMargin + 60, y + 108);
+    boxBorder(leftMargin, y, colLeftW, 112);
+
+    // ===== CUSTOMER COMMUNICATIONS =====
+    sectionHeader('Customer Communications', colRightX, y, colRightW);
+    const messages = [];
+    const planned = outages.find(o => o.area === account.city && o.status === 'Scheduled');
+    if (planned) {
+        messages.push(['Planned Maintenance in Your Area',
+            `${planned.description} Service may be interrupted on ${planned.start} until ${planned.end.slice(-5)}. Our crews will restore power as quickly and safely as possible.`]);
+    }
+    messages.push(['Ways to Save This Season',
+        `${energyTips[3].text} ${energyTips[2].text} Visit ${website} to learn more.`]);
+    if (!settings.paperless) {
+        messages.push(['Go Paperless', 'Get your statement faster and help the environment. Enroll in paperless billing in the customer portal.']);
+    }
+    let cy = y + 13;
+    messages.forEach(([title, text]) => {
+        if (cy > y + 44) return;
+        setText(9, 'bold');
+        doc.text(title, colRightX + 3, cy);
+        cy = paragraph(text, colRightX + 3, cy + 4.5, colRightW - 6, 8.5) + 2.5;
+    });
+    boxBorder(colRightX, y, colRightW, 56);
+
+    // ===== CONTACT INFO =====
+    const cbY = y + 62;
+    doc.setFillColor(241, 243, 245);
+    doc.rect(colRightX, cbY, colRightW, 50, 'F');
+    setText(9);
+    doc.text([companyInfo.name, ...remitAddress], colRightX + 4, cbY + 7);
+    setText(8.5, 'bold');
+    const outageLines = doc.splitTextToSize('Power Outages or Emergencies:', 34);
+    doc.text(outageLines, colRightX + 46, cbY + 7);
+    setText(8.5);
+    doc.text(companyInfo.emergencyLine, colRightX + 46, cbY + 7 + outageLines.length * 3.6);
+
+    setText(9, 'bold');
+    doc.text('Questions?', colRightX + 4, cbY + 25);
+    setText(8);
+    [
+        `Web: ${website}`,
+        `Email: ${companyInfo.email}`,
+        `Phone: ${companyInfo.phone}`,
+        `Hours: ${companyInfo.hours}`
+    ].forEach((line, i) => doc.text(line, colRightX + 4, cbY + 30 + i * 4.2));
+    setText(7, 'italic', 80);
+    doc.text(companyInfo.tagline, colRightX + 4, cbY + 47.5);
+
+    // ===== FOOTER NOTE =====
+    setText(9);
+    doc.text(`For more information about your electric service, please visit ${website}.`, pageWidth / 2, 213, { align: 'center' });
+
     // ===== PAYMENT STUB (Bottom) =====
-    y = 220;
-    doc.setDrawColor(150, 150, 150);
-    doc.setLineDashPattern([3, 3], 0);
-    doc.line(leftMargin, y, rightMargin, y);
-    doc.setLineDashPattern([], 0);
-    
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    doc.text('- - - DETACH AND RETURN WITH PAYMENT - - -', 105, y + 5, { align: 'center' });
-    
-    y += 12;
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Springfield Electric Utility', leftMargin, y);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.text('P.O. Box 12345', leftMargin, y + 5);
-    doc.text('Springfield, IL 62701', leftMargin, y + 10);
-    
-    // Payment info box
-    doc.setFillColor(248, 250, 252);
-    doc.roundedRect(100, y - 5, 95, 35, 2, 2, 'F');
-    doc.setFontSize(8);
-    doc.text('Account Number:', 105, y + 2);
-    doc.setFont('helvetica', 'bold');
-    doc.text(account.accountNumber, 150, y + 2);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Amount Due:', 105, y + 10);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(14);
-    doc.text(formatCurrency(bill.amountDue), 150, y + 11);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.text('Due Date:', 105, y + 18);
-    doc.setFont('helvetica', 'bold');
-    doc.text(formatDate(bill.dueDate), 150, y + 18);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Amount Enclosed: $__________', 105, y + 26);
-    
-    // Footer
-    y = 280;
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    doc.text('Questions? Call 1-800-555-ELEC | Pay online at springfieldelectric.com | Available 24/7', 105, y, { align: 'center' });
-    
+    dashedLine(217);
+    setText(7, 'normal', 110);
+    doc.text(`Detach here and return with your check made payable to ${companyInfo.name}. Please write your account number on the memo line.`,
+        pageWidth / 2, 221, { align: 'center' });
+
+    y = 230;
+    setText(12, 'bold');
+    doc.text(companyInfo.name, leftMargin, y + 2);
+    setText(9);
+    doc.text(remitAddress, leftMargin, y + 7);
+
+    [
+        ['Account Number:', account.accountNumber, 128],
+        ['Due Date:', formatDate(bill.dueDate), 160],
+        ['Amount Due:', formatCurrency(totalDue), 184]
+    ].forEach(([label, value, cx]) => {
+        setText(9, 'bold');
+        doc.text(label, cx, y, { align: 'center' });
+        setText(10);
+        doc.text(value, cx, y + 6, { align: 'center' });
+    });
+
+    doc.setFillColor(...lightBlue);
+    doc.rect(110, y + 10, 85, 6, 'F');
+    setText(8, 'bold');
+    doc.text(settings.autopay ? 'AutoPay draft date: on the due date' : `Enroll in AutoPay at ${website}`, 152.5, y + 14, { align: 'center' });
+    setText(9);
+    doc.text('Amount Enclosed:  $____________', 152.5, y + 24, { align: 'center' });
+
+    setText(9);
+    doc.text([
+        account.name.toUpperCase(),
+        account.serviceAddress.toUpperCase(),
+        `${account.city.toUpperCase()} ${account.state} ${account.zip}`
+    ], leftMargin + 5, y + 36);
+    doc.text([companyInfo.name.toUpperCase(), ...remitAddress.map(line => line.toUpperCase())], 120, y + 36);
+
+    doc.setFont('courier', 'normal');
+    doc.setFontSize(11);
+    doc.text(`${account.accountNumber.replace(/\D/g, '')}${bill.dueDate.replace(/-/g, '')}${String(Math.round(totalDue * 100)).padStart(10, '0')}`,
+        rightMargin, 284, { align: 'right' });
+
+    setText(7, 'normal', 110);
+    doc.text('Page 1 of 2', rightMargin, 292, { align: 'right' });
+
+    // ===== PAGE 2 =====
+    doc.addPage();
+    setText(8, 'normal', 90);
+    doc.text(`${companyInfo.name}  |  Account ${account.accountNumber}  |  ${bill.billingPeriod}`, leftMargin, 12);
+    doc.text('Page 2 of 2', rightMargin, 12, { align: 'right' });
+
+    const p2RightX = 110;
+    const p2RightW = rightMargin - p2RightX;
+
+    // ===== SERVICE LOCATION DETAILS =====
+    y = 22;
+    sectionHeader('Service Location Details', leftMargin, y, colLeftW, 10, 13);
+    row('Account Number', account.accountNumber, leftMargin, y + 16, colLeftW);
+    row('Service Address', account.serviceAddress, leftMargin, y + 21.5, colLeftW);
+    row('', `${account.city}, ${account.state} ${account.zip}`, leftMargin, y + 26, colLeftW);
+    row('Rate Type', account.rateType, leftMargin, y + 31.5, colLeftW);
+    row('Customer Since', formatDate(account.serviceStartDate), leftMargin, y + 37, colLeftW);
+    boxBorder(leftMargin, y, colLeftW, 41);
+
+    // ===== METER DETAILS =====
+    y = 67;
+    sectionHeader('Meter Details', leftMargin, y, colLeftW, 8, 10);
+    [
+        ['Meter Number', account.meterNumber],
+        ['Service Period', `${formatDate(bill.startDate)} - ${formatDate(bill.endDate)}`],
+        ['Read Type', 'Actual'],
+        ['Previous Meter Read', bill.previousReading.toLocaleString()],
+        ['Current Meter Read', bill.currentReading.toLocaleString()],
+        ['Days in Service Period', String(daysInPeriod)],
+        ['Average Daily Usage', `${(bill.usageKwh / daysInPeriod).toFixed(1)} kWh`]
+    ].forEach(([label, value], i) => row(label, value, leftMargin, y + 13 + i * 5.5, colLeftW));
+    row('kWh Usage', bill.usageKwh.toLocaleString(), leftMargin, y + 13 + 7 * 5.5, colLeftW, 'bold');
+    boxBorder(leftMargin, y, colLeftW, 56);
+
+    // ===== CURRENT CHARGE DETAILS =====
+    y = 22;
+    const energyItems = bill.lineItems.slice(0, 2);
+    const feeItems = bill.lineItems.slice(2);
+    sectionHeader('Current Charge Details', p2RightX, y, p2RightW, 10, 13);
+    setText(9);
+    doc.text(`Product: ${account.rateType} Standard Service`, p2RightX + 3, y + 16);
+    energyItems.forEach((item, i) => row(item.description, formatCurrency(item.amount), p2RightX, y + 21.5 + i * 5.5, p2RightW));
+    boxBorder(p2RightX, y, p2RightW, 31);
+
+    y = 58;
+    sectionHeader('Taxes and Other Fees', p2RightX, y, p2RightW, 8, 10);
+    feeItems.forEach((item, i) => row(item.description, formatCurrency(item.amount), p2RightX, y + 13 + i * 5, p2RightW));
+    const totalBarY = y + 11 + feeItems.length * 5;
+    doc.setFillColor(...lightBlue);
+    doc.rect(p2RightX, totalBarY, p2RightW, 8, 'F');
+    setText(10, 'bold');
+    doc.text('Total Current Charges', p2RightX + 3, totalBarY + 5.5);
+    doc.text(formatCurrency(bill.amountDue), rightMargin - 3, totalBarY + 5.5, { align: 'right' });
+    boxBorder(p2RightX, y, p2RightW, totalBarY + 8 - y);
+
+    let ny = paragraph(`The average price you paid for electric service this month was ${avgCents} cents / kWh.`, p2RightX, totalBarY + 13, p2RightW, 8.5);
+    paragraph(settings.autopay
+        ? 'AutoPay is active on your account. No action is needed; your payment will be drafted on the due date.'
+        : 'Never miss a due date. Enroll in AutoPay through the customer portal.',
+    p2RightX, ny, p2RightW, 8.5, 'bold');
+
+    // ===== UNDERSTANDING YOUR BILL =====
+    y = 135;
+    setText(12, 'bold');
+    doc.text('Understanding Your Bill', leftMargin, y);
+    y += 6;
+    [
+        ['Customer Charge', 'A fixed monthly amount that covers the cost of meter reading, billing, and maintaining service to your home, regardless of how much energy you use.'],
+        ['Energy Charge', 'The cost of the electricity you used during the billing period, calculated by multiplying your kWh usage by the current rate.'],
+        ['Regulatory Assessment Fee', 'A fee collected on behalf of state regulators to fund utility oversight and consumer protection programs.'],
+        ['Franchise Fee & Taxes', 'Amounts collected for local municipalities and state taxing authorities. These are passed through to you without markup.']
+    ].forEach(([term, text]) => {
+        setText(9, 'bold');
+        doc.text(term, leftMargin, y);
+        y = paragraph(text, leftMargin + 48, y, rightMargin - leftMargin - 48, 8.5) + 1.5;
+    });
+
+    // ===== ADDITIONAL INFORMATION =====
+    y += 5;
+    setText(10, 'bolditalic');
+    doc.text('Additional Information', leftMargin, y);
+    y = paragraph(`Your satisfaction is our top priority. Do you have feedback? Email us at ${companyInfo.email} or write to us at ${companyInfo.name} Customer Feedback, ${remitAddress.join(', ')}. The amount billed may include rate changes approved by regulatory authorities. See an unauthorized charge on your bill? Call us toll-free at ${companyInfo.phone} (${companyInfo.hours}) and we will work to resolve any issue.`,
+        leftMargin, y + 4.5, rightMargin - leftMargin, 7.5, 'bold');
+    paragraph('If you are not satisfied with the resolution, you may file a complaint with your state public utility commission. Hearing and speech-impaired customers may contact us through the 711 relay service.',
+        leftMargin, y, rightMargin - leftMargin, 7.5);
+
+    dashedLine(212);
+
+    // ===== ENERGY ASSISTANCE =====
+    y = 224;
+    setText(12, 'bold');
+    doc.text('Need Help Paying Your Bill?', leftMargin, y);
+    ny = paragraph('Assistance may be available for eligible customers through the Low Income Home Energy Assistance Program (LIHEAP), local community action agencies, and our Neighbor-to-Neighbor fund.',
+        leftMargin, y + 6, 80, 8.5);
+    ny = paragraph(`${energyTips[0].title}: ${energyTips[0].text}`, leftMargin, ny + 2, 80, 8.5);
+    paragraph(`Call ${companyInfo.phone} to learn about payment arrangements.`, leftMargin, ny + 2, 80, 8.5, 'bold');
+
+    // ===== WAYS TO PAY =====
+    y = 224;
+    setText(12, 'bold');
+    doc.text('Ways to Pay Your Bill', p2RightX, y);
+    [
+        ['AutoPay', 'Log in to the customer portal and sign up for automatic payments.'],
+        ['Online', `${website}/pay`],
+        ['Phone', `${companyInfo.phone} (${companyInfo.hours})`],
+        ['Mail', `${companyInfo.name}, ${remitAddress.join(', ')}`],
+        ['In Person', `Visit an authorized payment location. Find one at ${website}/locations`]
+    ].forEach(([title, text], i) => {
+        const iy = y + 7 + i * 10;
+        doc.setFillColor(30, 64, 175);
+        doc.circle(p2RightX + 2, iy - 1, 1.5, 'F');
+        setText(9, 'bold');
+        doc.text(title, p2RightX + 6, iy);
+        paragraph(text, p2RightX + 6, iy + 3.8, p2RightW - 6, 7.5, 'normal', 60);
+    });
+
+    setText(11, 'bold', 90);
+    doc.text('Ofrecemos asistencia en español.', p2RightX, 289);
+
     // Save PDF
     doc.save(`Springfield_Electric_Statement_${bill.billingPeriod.replace(' ', '_')}.pdf`);
 }
