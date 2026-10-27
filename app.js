@@ -543,6 +543,7 @@ function downloadStatement() {
     setText(9);
     doc.text([
         account.name.toUpperCase(),
+        ...(account.secondaryName ? [account.secondaryName.toUpperCase()] : []),
         account.serviceAddress.toUpperCase(),
         `${account.city.toUpperCase()} ${account.state} ${account.zip}`
     ], leftMargin + 5, y + 36);
