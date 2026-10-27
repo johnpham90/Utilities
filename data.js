@@ -62,7 +62,7 @@ const bills = {
             energyCharge: 104.40,
             taxes: 10.39,
             amountDue: 129.79,
-            isPaid: false,
+            isPaid: true,
             dailyUsage: [28, 29, 27, 28, 28, 29, 27, 28, 28, 29, 27, 28, 28, 29, 27, 28, 28, 29, 27, 28, 28, 29, 27, 28, 28, 29, 27, 28, 28, 29, 29]
         },
         {
