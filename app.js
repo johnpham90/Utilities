@@ -364,7 +364,7 @@ function downloadStatement() {
     [
         ['Statement Date:', formatDate(bill.endDate)],
         ['Due Date:', formatDate(bill.dueDate)],
-        ['Customer Name:', account.name],
+        ['Customer Name:', account.secondaryName ? `${account.name} & ${account.secondaryName}` : account.name],
         ['Account Number:', account.accountNumber],
         ['Invoice Number:', invoiceNumber]
     ].forEach(([label, value], i) => {
